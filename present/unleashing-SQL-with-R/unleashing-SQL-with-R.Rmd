@@ -1,0 +1,968 @@
+---
+title: "Unleashing SQL"
+subtitle: "🚀<br/><br/>with R"
+author: "Daniel Fryer"
+institute: "NZSSN"
+date: "2021/11/25"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    yolo: true
+    css: [default, rutgers-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/c/c8/Podzia%C5%82_orbitera_na_podstawowe_elementy_konstrukcyjne.svg)
+
+background-size: contain
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+???
+
+Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sharingan_triple.svg)
+
+---
+
+class: center, middle
+
+# The fundamentals
+
+---
+
+# Why learn R?
+
+.pull-left[
+
+Community! 
+
+- Nerds
+- Statisticians
+- Data analysts
+- Social scientists
+- Psychologists
+- Bioinformaticians
+- Medical researchers
+- Programmers
+- Artists
+- Machine learners
+- Industry
+- ...
+
+State of the art statistical analysis **packages**.
+
+Free, open source, transparent.
+]
+
+--
+.pull-right[
+
+Tons of help and inspiration:
+
+- [Twitter](https://twitter.com/rfunctionaday/)
+- [Blogs](https://mdneuzerling.com/post/my-data-science-job-hunt/)
+- [Educators](https://emitanaka.org/)
+- [Books](https://r4ds.had.co.nz/)
+- [Galleries](https://www.r-graph-gallery.com/)
+- [Journals](https://journal.r-project.org/)
+- [Conferences](https://user2021.r-project.org/)
+- [CRAN](https://cran.r-project.org/)
+
+Powerful and capable:
+
+- [Reproducible research!](https://ropensci.org/)
+- Make slides ([xaringan](https://bookdown.org/yihui/rmarkdown/xaringan.html))
+- Automatic reports ([RMarkdown](https://bookdown.org/yihui/rmarkdown/))
+- Dashboards ([Shiny](https://shiny.rstudio.com/))
+- Interactive plots ([plotly](https://plotly.com/r/))
+- [Used in industry](https://data-flair.training/blogs/r-applications/)
+
+**It's from New Zealand!**
+
+]
+
+---
+
+# Why learn R with SQL?
+
+Keep your data organised.
+
+--
+
+Scaleable: potentially work with more data.
+
+--
+
+Understand [tidy data](https://vita.had.co.nz/papers/tidy-data.pdf) better.
+
+--
+
+Understand the [tidyverse](https://www.tidyverse.org/) better.
+
+--
+
+Work with remote servers in large collaborations.
+
+--
+
+Combine all your CSV files into a single file ([SQLite](https://www.sqlite.org/index.html)).
+
+--
+
+Search and query your combined CSV files with ease ([DB Browser](https://sqlitebrowser.org/)).
+
+---
+
+# Showing off
+
+```{r out.width='100%', fig.height=6, eval=require('leaflet')}
+library(leaflet)
+leaflet() %>% addTiles() %>% setView(174.76898, -36.85231, zoom = 10)
+```
+
+---
+
+# Project management 🍳
+
+**Scripts** are essentially text files that you save your code to.
+
+--
+
+Every **project** should have its own folder (usually with subfolders).
+
+--
+
+A single project typically involves:
+
+- Preparation, analysis, presentation, data.
+
+--
+
+The **working directory** should always be the **project root**.
+
+--
+
+Your **workspace** is the RStudio environment, including all the variables you have created, and your 'history'. *Do not rely on this*.
+
+--
+
+''*The source code is real. The objects are realizations of the source code.*''
+
+---
+
+# Where do you put your data?
+
+--
+.pull-left[
+In the data folder!
+
+- Raw data
+- Processed data
+
+Always think about a new person opening your project directory for the first time. Will it work seamlessly? Will they know how to use it?
+
+*Restart your session frequently.*
+]
+
+--
+
+--
+
+.pull-right[
+```
+umbrella
+│   README.md
+│   start-here.R
+│
+└───data
+│   │
+│   └───raw
+│   └───processed
+│   
+└───prepare
+│   │   cleaning-functions.R
+│
+└───analyse
+│   │   analysis-functions.R
+│
+└───present
+    │
+    └───figures
+    └───unleashing-SQL
+```
+]
+
+---
+
+class: center, middle
+
+# Umbrella: a simple example project
+
+## [Click here to open](https://github.com/frycast/umbrella)
+
+---
+
+# R is a calculator
+
+```{r comment='#'}
+# a boring calculation
+5 + 7
+```
+
+--
+
+##### A calculator that can save variables
+
+```{r}
+x <- 5 + 7
+x*2
+```
+
+--
+
+##### In all sorts of ways
+
+```{r}
+x <- c(1,2,3,4,5)
+x*2
+```
+
+---
+
+# R has lists
+
+These are very powerful 
+
+```{r}
+Friends <- list(
+  id = c(1,2,3), 
+  FirstName = c('X','Y','Z'),
+  LastName = c('A','B','C'),
+  FavColour = c('red', 'blue', NA)
+)
+Friends
+```
+
+--
+
+*But the output looks kind of weird.*
+
+---
+
+# Let's make the lists look better
+
+```{r}
+Friends <- data.frame(Friends)
+Friends
+```
+
+--
+
+🤔 *Ummmm... can we do better?*
+
+--
+
+```{r, eval=require('tibble')}
+library(tibble)
+Friends <- tibble(Friends)
+Friends
+```
+
+🧠 *Wow, that's informative!*
+
+---
+
+# But *can we do better?*
+
+--
+  
+```{r eval=require('DT'), tidy=FALSE}
+library(DT)
+datatable(Friends)
+```
+
+---
+
+# A better dataset
+
+```{r eval=require('DT'), tidy=FALSE, echo=FALSE}
+DT::datatable(
+  iris[sort(sample(nrow(iris), 50)),],
+  fillContainer = FALSE, options = list(pageLength = 8)
+)
+```
+
+---
+
+# 🦜 Yet underneath, 'tis still but a list 🦜
+
+```{r}
+str(Friends)
+```
+
+--
+
+#### Lists, precious lists
+
+- 🤖 SQL stores data in a way that is great for machines 
+- 👪 R stores data in a way that is great for programmers 
+
+--
+
+#### Everything is...
+
+Everything in R is either **data** or a **function**. We refer to 'things' as 'objects'.
+
+---
+
+The contents of lists can be accessed with `$`
+
+```{r}
+Friends$FavColour
+```
+
+So, what is `$`? 
+
+--
+
+Well, if `$` is not data, then it's a function.
+
+```{r}
+`$`(Friends, FavColour)
+```
+
+Just a sneaky function.
+
+--
+
+Here's another function for accessing things! `[`
+
+```{r}
+Friends[1,4]
+```
+
+---
+
+# Thinking in vectors
+
+Here's a vector of `TRUE` / `FALSE`
+```{r}
+x <- c(TRUE, FALSE, TRUE)
+```
+
+--
+
+We can use it to get friends.
+
+```{r}
+Friends[x,]
+```
+
+--
+
+```{r}
+Friends[!x,]
+```
+
+
+
+---
+
+# Packages make functions and data
+
+But we can (and should) make our own functions.
+
+--
+
+```{r, comment='#'}
+# A function that checks if x is 'blue'
+is_x_blue <- function(x) {
+  x == 'blue'
+}
+```
+
+--
+
+And we should use them often.
+
+```{r}
+is_x_blue('green')
+```
+
+```{r}
+is_x_blue('blue')
+```
+
+--
+
+We can use the argument explicitly, if we like.
+
+```{r}
+is_x_blue(x='red')
+```
+
+---
+
+# Functions are building blocks.
+
+
+The longer code gets, the harder it is to think about.
+
+--
+
+#### Do you prefer this?
+
+```{r, eval=FALSE}
+spec <- iris$Species
+iris_setosa <- iris[spec == "setosa", ]
+m <- lm(Sepal.Length ~ Petal.Length, data=iris_setosa)
+coef(summary(m))
+```
+
+--
+
+#### Or this?
+
+```{r, eval=FALSE}
+# Get the iris Setosa species
+iris_setosa <- where_species_is_setosa(iris)
+
+# Fit Model (1), and get results
+results <- fit_linear_model(iris_setosa, number = 1)
+
+# Print results
+results
+```
+
+---
+
+# The pipe operator `%>%`
+
+```{r, eval=FALSE}
+# Get the iris Setosa species
+iris_setosa <- where_species_is_setosa(iris)
+
+# Fit Model (1), and get results
+results <- fit_linear_model(iris_setosa, number = 1)
+
+# Print results
+results
+```
+
+--
+
+Many people prefer this instead:
+
+```{r, eval=FALSE}
+# Get Setosa species and fit Model (1)
+iris %>% 
+  where_species_is_setosa() %>%
+  fit_linear_model(number = 1)
+```
+
+--
+
+The pipe comes from 📦`magrittr`
+
+```{r, results="hide"}
+library(magrittr)
+```
+
+---
+
+background-image: url(https://raw.githubusercontent.com/rstudio/hex-stickers/master/SVG/tidyverse.svg)
+
+background-size: contain
+
+---
+
+class: center, middle
+
+# Tidy data
+
+---
+
+class: center, middle
+
+''*Happy families are all alike;*</br>
+*every unhappy family is unhappy in its own way*''</br>
+\- Leo Tolstoy.
+
+--
+
+''*Tidy datasets are all alike,*</br>
+*but every messy dataset is messy in its own way*''</br>
+\- Hadley Wickham.
+
+
+---
+
+class: center, middle
+
+''*The principles of tidy data are closely tied to those of relational databases... but are framed in a language familiar to statisticians*'' [1]
+
+.footnote[
+[1] [Wickham, H (2014), *Tidy Data*, The R Journal](https://vita.had.co.nz/papers/tidy-data.pdf)
+]
+---
+
+# Tidy data principles
+
+1. Every variable is a column.
+
+1. Every observation is a row.
+
+1. Every cell holds a single (atomic) value.
+
+--
+
+Conditions 1 and 2 are often referred to as **long format**.
+
+--
+
+### Advantages
+
+- Datasets can be read and understood universally.
+
+- Easier for R packages to work together.
+
+- Enables SQL-like operations.
+
+---
+
+# 🕵️ Messy data
+
+The R package 📦[`tidyr`](https://tidyr.tidyverse.org/) has functions for tidying messy data.
+
+--
+
+And it also has some datasets for us to play with.
+
+```{r, eval=require('tidyr'), results="hide"}
+library(tidyr)
+relig_income
+```
+
+```{r eval=require('DT'), tidy=FALSE, echo=FALSE}
+DT::datatable(
+  relig_income[,1:6],
+  fillContainer = FALSE, options = list(pageLength = 3)
+)
+```
+
+---
+
+# 🧹 Cleaning `relig_income`
+
+This kind of dataset is sometimes referred to as **wide format**.
+
+📦`tidyr` gives us [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html)
+
+--
+
+```{r, eval=FALSE}
+pivot_longer(
+  data = relig_income,
+  cols = !religion,
+  names_to = "income", 
+  values_to = "count"
+)
+```
+
+```{r, eval=require('DT'), tidy=FALSE, echo=FALSE}
+res <- pivot_longer(
+  data = relig_income,
+  cols = !religion,
+  names_to = "income", 
+  values_to = "count"
+) 
+DT::datatable(
+  res,
+  fillContainer = FALSE, options = list(pageLength = 3)
+)
+```
+
+---
+
+# 🔬 Messy data no.2: Anscombe's Quartet
+
+```{r, fig.height=4, dev='svg', echo=FALSE}
+# If you're a student reading this code, I apologise.
+# It's from the documentation of the anscombe dataset.
+# It's just here to produce the Anscombe's Quartet plot.
+
+require(stats); require(graphics)
+
+# the 4 regressions in a loop:
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+}
+
+# plots:
+op <- par(mfrow = c(2, 2), 
+          mar = 0.1+c(4,4,1,1), 
+          oma =  c(0, 0, 2, 0))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, 
+       col = "red", pch = 21, bg = "orange", cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "blue")
+}
+par(op)
+```
+
+---
+
+# Anscombe's Quartet
+
+```{r eval=require('DT'), tidy=FALSE, echo=FALSE}
+DT::datatable(
+  anscombe,
+  fillContainer = FALSE, options = list(pageLength = 6)
+)
+```
+
+---
+
+# 🧹 Cleaning Anscombe's Quartet
+
+```{r, eval=FALSE}
+pivot_longer(
+  data = anscombe,
+  cols = everything(),
+  names_to = c(".value", "set"),
+  names_pattern = "(.)(.)"
+)
+```
+```{r, eval=require('DT'), tidy=FALSE, echo=FALSE}
+res <- pivot_longer(
+  data = anscombe,
+  cols = everything(),
+  names_to = c(".value", "set"),
+  names_pattern = "(.)(.)"
+)
+DT::datatable(
+  res,
+  fillContainer = FALSE, options = list(pageLength = 4)
+)
+```
+
+---
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/d/d5/P_satellite_dish.svg)
+
+background-size: contain
+
+---
+
+class: center, middle
+
+# Getting connected to SQL
+
+---
+
+class: center, middle
+
+*For MySQL and T-SQL, see* </br> 
+*[this guide](https://htmlpreview.github.io/?https://github.com/frycast/SQL_course/blob/master/R/connecting-R/databases-in-R.html)*</br>
+*covering local and remote connections from R*
+
+---
+
+# The wonderful [SQLite](https://www.sqlite.org/index.html)
+
+SQLite is:
+- Small
+- Fast
+- Self contained
+- High reliability
+- Full-featured
+
+--
+
+The most used database engine in the world. 
+
+--
+
+Around one trillion active databases in use. 
+
+--
+
+Hundreds of SQLite databases on any smart phone. 
+
+--
+
+One of the top 5 most widely deployed software modules of any kind. 
+
+---
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/3/38/SQLite370.svg)
+
+background-size: contain
+
+---
+
+# Connect or create, one line!
+
+First get our directories organised (see [umbrella](https://github.com/frycast/umbrella)).
+
+```{r, eval=require('here')}
+library(here)
+```
+
+--
+
+Now, create or connect
+
+```{r, eval=require('RSQLite')}
+library(RSQLite)
+con <- dbConnect(
+  SQLite(), 
+  here("data", "raw", "Sandpit.sqlite")
+)
+```
+
+*If it can't be found, then* [`Sandpit.sqlite`](https://github.com/frycast/SQL_course/tree/master/R/sqlite-R) *will be created (empty).*
+
+---
+
+# Use the Sandpit database
+
+The package 📦[`dplyr`](https://dplyr.tidyverse.org/) gives us a whole 'grammar of data manipulation'.
+
+The package 📦[`dbplyr`](https://dbplyr.tidyverse.org/) allows `dplyr` to talk to SQL.
+
+```{r, eval=all(c(require('dplyr'), require('dbplyr')))}
+library(dplyr)
+library(dbplyr)
+```
+
+--
+
+**So many packages!** From now on I'll write them like this:
+
+```{r, eval=FALSE}
+dplyr::tbl()
+```
+
+The `dplyr::` means we are using a function from `dplyr`. The function we're using is called `tbl`. 
+
+---
+
+# 🍌 Connect to a table
+
+```{r}
+banana <- dplyr::tbl(con, "Ape_Banana")
+banana
+```
+
+---
+
+# Grammar of data manipulation 💘 SQL
+
+The function `dplyr::filter` is like the SQL `WHERE` clause.
+
+--
+
+```{r}
+ripe_banana <- banana %>% dplyr::filter(Ripe == 1)
+ripe_banana
+```
+
+---
+
+# Grammar of data manipulation 💘 SQL
+
+But seriously, `dplyr::filter` is *actually* the `WHERE` clause.
+
+```{r}
+ripe_banana %>% dplyr::show_query()
+```
+
+--
+
+To execute the query:
+
+```{r}
+ripe_banana %>% dplyr::collect()
+```
+
+---
+
+# ✍️ We can write our own SQL
+
+```{r, eval=FALSE}
+DBI::dbGetQuery(con, 
+"
+SELECT TreeID, COUNT(*) AS NumRipe, AVG(TasteRank) AS AvgTaste 
+FROM Ape_Banana
+WHERE DatePicked > '20180101'
+GROUP BY TreeID;
+"
+)
+```
+
+```{r, echo=FALSE}
+res <- DBI::dbGetQuery(con, 
+"
+SELECT TreeID, COUNT(*) AS NumRipe, AVG(TasteRank) AS AvgTaste 
+FROM Ape_Banana
+WHERE DatePicked > '20180101'
+GROUP BY TreeID;
+"
+)
+DT::datatable(
+  res,
+  fillContainer = FALSE, options = list(pageLength = 4)
+)
+```
+
+---
+
+# It's up to you
+
+```{r, results="hide"}
+tasty_bananas <- banana %>% 
+  dplyr::filter(DatePicked > '20180101') %>% 
+  dplyr::group_by(TreeID) %>% 
+  dplyr::summarise(NumRipe = n(), AvgTaste = mean(TasteRank, na.rm=T))
+```
+
+--
+
+We can always inspect the SQL code created by `dplyr`.
+
+```{r}
+tasty_bananas %>% show_query()
+```
+
+
+---
+
+# Advanced: programmatically edit queries 
+
+```{r, eval=require('stringr')}
+for (this_taste in c(3,4,5)) {
+  res <- DBI::dbGetQuery(con, stringr::str_interp("
+    SELECT * 
+    FROM Ape_Banana
+    WHERE TasteRank = ${this_taste}                  
+  "))
+  cat("\nResults for taste = ", this_taste, "\n")
+  print(nrow(res))
+}
+```
+
+---
+
+# Advanced no.2: batch process results
+
+Send the query without executing it.
+
+```{r}
+rs <- DBI::dbSendQuery(con, "
+  SELECT *
+  FROM Ape_Banana
+")
+```
+
+Process results, 20 at a time
+
+```{r}
+while (!DBI::dbHasCompleted(rs)) {
+  twenty_bananas <- DBI::dbFetch(rs, n = 20)
+  
+  # << insert processing on twenty_bananas here >>
+  
+  print(nrow(twenty_bananas))
+}
+```
+
+---
+
+# Saving results
+
+Collect the results
+
+```{r, warning=FALSE}
+tasty_bananas <- dplyr::collect(tasty_bananas)
+```
+
+Save as a CSV (📦[`readr`](https://readr.tidyverse.org/) is better at it).
+
+```{r, eval=require('readr')}
+library(readr)
+
+# Choose the processed data directory
+location <- here("data", "processed", "tasty_bananas.csv")
+
+# Write CSV
+readr::write_csv(tasty_bananas, location)
+```
+
+---
+
+# Saving results
+
+Or save to SQLite.
+
+```{r, echo=FALSE, results="hide"}
+location <- here("data", "processed", "Sandpit_results.sqlite")
+unlink(location)
+```
+
+```{r}
+# Choose the processed data directory
+location <- here("data", "processed", "Sandpit_results.sqlite")
+
+# Connect or create database
+res_con <- DBI::dbConnect(RSQLite::SQLite(), location)
+
+# Save the table
+DBI::dbWriteTable(res_con, "tasty_bananas", tasty_bananas)
+```
+
+---
+
+# Don't forget to disconnect
+
+When you're done.
+
+```{r}
+DBI::dbDisconnect(con)
+DBI::dbDisconnect(res_con)
+```
+
+---
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/7/74/Space_Exploration_Vehicle.svg)
+
+background-size: contain
+
+---
+
+class: center, middle
+
+# Live guide and demonstrations
+
+---
+
+# Live guide and demonstrations
+
+- Using GitHub
+- Downloading [umbrella](https://github.com/frycast/umbrella) repository
+- Using [DB Browser](https://sqlitebrowser.org/) with SQLite
+- Live demo of connecting and exploring
+
+Also, see the [R code folder](https://github.com/frycast/SQL_course/tree/master/R/sqlite-R) on the course repo.
+
+---

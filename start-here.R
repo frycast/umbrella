@@ -21,7 +21,7 @@
 library(here)
 
 # {dplyr} introduces a grammar of data manipulation (similar to SQL)
-# https://github.com/rstudio/cheatsheets/blob/main/data-transformation.pdf
+# https://dplyr.tidyverse.org/f
 library(dplyr)
 
 # {dbplyr} helps dplyr work with databases
@@ -29,21 +29,33 @@ library(dplyr)
 library(dbplyr)
 
 # {tidyr} is for reshaping and tidying data
-# https://github.com/rstudio/cheatsheets/blob/main/tidyr.pdf
+# https://tidyr.tidyverse.org/
 library(tidyr)
 
 # {stringr} is convenient library for working with strings
-# https://github.com/rstudio/cheatsheets/blob/main/strings.pdf
+# https://stringr.tidyverse.org/
 library(stringr)
 
 # {readr} is great for reading and writing csv files
-# https://github.com/rstudio/cheatsheets/blob/main/data-import.pdf
+# https://readr.tidyverse.org/
 library(readr)
+
+# {purrr} makes it easy to work functionally with lists
+# https://purrr.tidyverse.org/
+library(purrr)
+
+# {ggplot2} is provides a grammar of data visualisation
+# https://ggplot2.tidyverse.org/
+library(ggplot2)
+
+# {broom} helps with summarising model results
+# https://broom.tidymodels.org/
+library(broom)
 
 # Prepare relig_income data -----------------------------------------------
 
 # Source all functions for preparing relig_income data
-source(here("prepare", "relig_income.R"))
+source(here("prepare", "relig-income-functions.R"))
 
 relig_income_tidy <- here("data","raw","relig_income_raw.csv") %>% 
   # Load relig_income data
@@ -54,7 +66,7 @@ relig_income_tidy <- here("data","raw","relig_income_raw.csv") %>%
 # Prepare the anscombe data -----------------------------------------------
 
 # Load all functions for preparing anscombe data
-source(here("prepare", "anscombe.R"))
+source(here("prepare", "anscombe-functions.R"))
 
 anscombe_tidy <- here("data","raw","anscombe_raw.csv") %>% 
   # Load anscombe data
@@ -68,11 +80,14 @@ anscombe_tidy <- here("data","raw","anscombe_raw.csv") %>%
 mtcars_raw <- readr::read_csv(here("data","raw","mtcars_raw.csv"))
 iris_raw <- readr::read_csv(here("data","raw","iris_raw.csv"))
 
+# Get the SQLite database location
+db_location <- here("data", "processed", "db1.sqlite")
+
+# Delete the database if it already exists
+unlink(db_location)
+
 # Create the SQLite database and establish connection
-con <- DBI::dbConnect(
-  RSQLite::SQLite(), 
-  here("data", "processed", "db1.sqlite")
-)
+con <- DBI::dbConnect(RSQLite::SQLite(), db_location)
 
 # Write all tables to the SQLite database db1
 DBI::dbWriteTable(con, "relig_income", relig_income_tidy)
@@ -86,16 +101,15 @@ DBI::dbDisconnect(con)
 # Begin analysis ----------------------------------------------------------
 
 # Load all functions for main analysis
-source(here("analyse", "main-analysis.R"))
+source(here("analyse", "analysis-functions.R"))
 
-### Insert analysis code here that uses processed data from SQLite db1
+# Fit linear models
+results <- fit_anscombe_models(anscombe_tidy)
 
-### output figures to the present/figures folder
+# View the results
+results
 
+# Produce plots
+plot_anscombe_data(anscombe_tidy)
 
-
-
-
-
-
-
+## If you save plots, put them in the folder present/figures

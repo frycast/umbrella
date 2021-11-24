@@ -1,1 +1,0 @@
-# This script contains all functions to conduct the main analysis
