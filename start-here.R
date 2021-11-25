@@ -65,7 +65,7 @@ relig_income_tidy <- here("data","raw","relig_income_raw.csv") %>%
 
 # Prepare the anscombe data -----------------------------------------------
 
-# Load all functions for preparing anscombe data
+# Load all functions for preparing the anscombe data
 source(here("prepare", "anscombe-functions.R"))
 
 anscombe_tidy <- here("data","raw","anscombe_raw.csv") %>% 
