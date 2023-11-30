@@ -1,2 +1,2 @@
 # umbrella
- An umbrella project structure to use as an example for the course
+An umbrella project structure to use as an example in the intro to SQL course
