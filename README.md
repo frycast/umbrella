@@ -1,2 +1,2 @@
 # umbrella
- An umbrella project structure
+ An umbrella project structure to use as an example

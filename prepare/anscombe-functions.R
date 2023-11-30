@@ -4,7 +4,7 @@
 tidy_anscombe <- function(anscombe) {
   tidyr::pivot_longer(
     data = anscombe,
-    cols = tidyr::everything(),
+    cols = tidyr::everything(), # see https://tidyselect.r-lib.org/reference/everything.html
     names_to = c(".value", "set"),
     names_pattern = "(.)(.)"
   )
